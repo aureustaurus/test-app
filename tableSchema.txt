@@ -1,0 +1,26 @@
+-- Table: items
+
+-- DROP TABLE items;
+
+CREATE TABLE items
+(
+  id character(10) NOT NULL,
+  title character(300),
+  by character(50),
+  kids character(700),
+  "time" character(10),
+  score character(3),
+  deleted character(5),
+  type character(7),
+  text character(3000),
+  dead character(5),
+  parent character(10),
+  descendants character(4),
+  url character(257),
+  CONSTRAINT id PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE items
+  OWNER TO postgres;

@@ -2,6 +2,9 @@ var koaRequest = require('koa-request');
 var pg = require('pg');
 var connectionString = 'postgres://postgres:pass123@localhost:5432/test';
 
+var client = new pg.Client(connectionString);
+client.connect();
+
 var StoryModel = {
   serviceUrl: 'https://hacker-news.firebaseio.com/v0/',
 
@@ -54,10 +57,7 @@ var StoryModel = {
 
   getStoriesFromDb: function* () {
     var result = [];
-    var client = new pg.Client(connectionString);
-    client.connect();
     var itemsFromDb = yield client.query('SELECT * FROM items ORDER BY id DESC LIMIT 10');
-    client.end();
     var rows = itemsFromDb.rows;
     for (item of rows) {
       var keys = Object.keys(item);
@@ -77,11 +77,8 @@ var StoryModel = {
 
   getItemFromDbById: function* (id) {
     var result = {};
-    var client = new pg.Client(connectionString);
-    client.connect();
     id = (id + '   ').substring(0, 10);
     var itemsFromDb = yield client.query("SELECT * FROM items WHERE id = '"+id+"'");
-    client.end();
     result = itemsFromDb.rows[0];
     var keys = Object.keys(result);
     for (key of keys) {
@@ -96,8 +93,6 @@ var StoryModel = {
   },
 
   insertItemToDb: function* (item) {
-    var client = new pg.Client(connectionString);
-    client.connect();
     // id, deleted, type, by, time, text, dead, parent, kids, url, score, title, parts, descendants
     var keys = ['id', 'deleted', 'type', 'by', 'time', 'text', 'dead', 'parent', 'kids', 'url', 'score', 'title', 'descendants'];
     for (key of keys) {
@@ -117,10 +112,8 @@ var StoryModel = {
       var resultFromDb = yield client.query(queryToInsert, [item.id, item.deleted, item.type, item.by, item.time, item.text, item.dead, item.parent, item.kids, item.url, item.score, item.title, item.descendants]);
     }
     catch (err) {
-      client.end();
       return(false);
     }
-    client.end();
     if (!resultFromDb.rows[0].id) {
       return(false);
     } else {
